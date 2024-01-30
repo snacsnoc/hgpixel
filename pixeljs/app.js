@@ -65,7 +65,19 @@
         // Other event types goes here
         // TODO: allow clients to define any custom event name
     }
-
+    // Function to track button clicks
+    function trackButtonClicks() {
+        // Listen for all click events on the document
+        document.addEventListener('click', function(e) {
+            // Check if the clicked element is a button or has a role of 'button', eg <form> buttons
+            if (e.target.tagName === 'BUTTON' || e.target.getAttribute('role') === 'button') {
+                trackEvent('button_click', {
+                    buttonText: e.target.innerText || 'Unnamed Button',
+                    buttonId: e.target.id || 'No ID'
+                });
+            }
+        });
+    }
     // Process the event queue
     function processEventQueue() {
         while (eventQueue.length > 0) {
@@ -93,6 +105,9 @@
         document.addEventListener('submit', function (e) {
             trackEvent('form_submit', {formId: e.target.id});
         });
+
+        // Track Button Clicks
+        trackButtonClicks();
     }
 
     // Initialization
