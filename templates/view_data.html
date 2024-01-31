@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tracking Data</title>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+
+    <!-- jQuery Library -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="//cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+<h2>Tracking Event Data</h2>
+<table id="trackingDataTable">
+    <thead>
+        <tr>
+            <th>Client ID</th>
+            <th>Event Type</th>
+            <th>Event Data</th>
+            <th>Session ID</th>
+            <th>User ID</th>
+            <th>Timestamp</th>
+            <th>URL</th>
+            <th>Referrer</th>
+            <th>User Agent</th>
+            <th>Device Info</th>
+        </tr>
+    </thead>
+    {% for row in result %}
+    <tr>
+        <td>{{ row.clientID }}</td>
+        <td>{{ row.eventType }}</td>
+        <td>{{ row.eventData }}</td>
+        <td>{{ row.sessionId }}</td>
+        <td>{{ row.userId }}</td>
+        <td>{{ row.timestamp }}</td>
+        <td>{{ row.url }}</td>
+        <td>{{ row.referrer }}</td>
+        <td>{{ row.userAgent }}</td>
+        <td>{{ row.deviceInfo }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<script>
+    // jQuery is the devil
+    // ...until you want something done quickly
+    $(document).ready(function () {
+        $('#trackingDataTable').DataTable({
+            "paging": true,
+            "ordering": true,
+            "info": true,
+            "searching": true
+        });
+    });
+</script>
+
+</body>
+</html>
