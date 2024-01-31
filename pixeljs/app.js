@@ -17,6 +17,7 @@
     }
 
     // Get or set cookie
+    // Used for storing/retrieving our user and session data
     function getOrSetCookie(name, value) {
         let cookieValue = document.cookie.split('; ').find(row => row.startsWith(name + '='));
         if (!cookieValue) {
@@ -41,7 +42,8 @@
             timestamp: new Date().toISOString(),
             url: window.location.href,
             referrer: document.referrer,
-            userAgent: navigator.userAgent
+            userAgent: navigator.userAgent,
+            deviceInfo: getDeviceInfo(),
             //firstBornBabyName
         };
 
@@ -65,10 +67,11 @@
         // Other event types goes here
         // TODO: allow clients to define any custom event name
     }
+
     // Function to track button clicks
     function trackButtonClicks() {
         // Listen for all click events on the document
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             // Check if the clicked element is a button or has a role of 'button', eg <form> buttons
             if (e.target.tagName === 'BUTTON' || e.target.getAttribute('role') === 'button') {
                 trackEvent('button_click', {
@@ -78,6 +81,64 @@
             }
         });
     }
+
+    function trackOutboundClick() {
+        document.addEventListener('click', function (e) {
+            if (e.target.tagName === 'A' && e.target.hostname !== window.location.hostname) {
+                trackEvent('outbound_link', {
+                    linkText: e.target.innerText || 'Unnamed Link',
+                    linkUrl: e.target.href
+                });
+            }
+        });
+    }
+
+    // Page performance metrics
+    // TODO: make this configurable via embed
+    function trackPerformanceMetrics() {
+        window.addEventListener('load', function () {
+            // Do calculation after load event is completed
+            setTimeout(function () {
+                const performance = window.performance || window.mozPerformance || window.msPerformance || window.webkitPerformance;
+                if (performance) {
+                    const navigationStart = performance.timing.navigationStart;
+                    const loadEventEnd = performance.timing.loadEventEnd;
+                    const totalTime = loadEventEnd - navigationStart;
+                    trackEvent('performance_metrics', {totalTime});
+                }
+            }, 0);
+        });
+    }
+
+
+    function getDeviceInfo() {
+        let pluginsDetails = [];
+        // Get browser plugin info
+        if (navigator.plugins) {
+            for (let i = 0; i < navigator.plugins.length; i++) {
+                pluginsDetails.push({
+                    name: navigator.plugins[i].name,
+                    description: navigator.plugins[i].description,
+                    filename: navigator.plugins[i].filename
+                });
+            }
+        }
+        return {
+            screenResolution: window.screen.width + 'x' + window.screen.height,
+            operatingSystem: navigator.platform,
+            deviceType: detectDeviceType(),
+            browserLanguage: navigator.language || navigator.userLanguage,
+            // browserPlugins: pluginsDetails, //This makes data very verbose
+        };
+    }
+
+    function detectDeviceType() {
+        const ua = navigator.userAgent;
+        if (/mobile/i.test(ua)) return 'Mobile';
+        if (/iPad|Android|Touch/i.test(ua)) return 'Tablet';
+        return 'Desktop';
+    }
+
     // Process the event queue
     function processEventQueue() {
         while (eventQueue.length > 0) {
@@ -105,6 +166,13 @@
         document.addEventListener('submit', function (e) {
             trackEvent('form_submit', {formId: e.target.id});
         });
+
+        // Track outbound links
+        trackOutboundClick();
+
+        // Track page performance metrics
+        trackPerformanceMetrics();
+
 
         // Track Button Clicks
         trackButtonClicks();
